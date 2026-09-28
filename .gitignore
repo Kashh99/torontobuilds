@@ -7,3 +7,5 @@ node_modules/
 .next/
 .vercel/
 *:Zone.Identifier
+.gstack/
+web/sample-events.json
