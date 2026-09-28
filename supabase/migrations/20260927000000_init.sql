@@ -29,15 +29,11 @@ create table events (
   tags text[] not null default '{}',
   dedup_hash text not null unique,       -- sha1(normalized title | date | online/in-person)
   scraped_at timestamptz not null default now(),
-  created_at timestamptz not null default now(),
-  search tsvector generated always as (
-    to_tsvector('english', title || ' ' || coalesce(summary, '') || ' ' || description)
-  ) stored
+  created_at timestamptz not null default now()
 );
 
 create index events_start_time_idx on events (start_time);
 create index events_category_idx on events (category);
-create index events_search_idx on events using gin (search);
 
 -- Public read-only. The scraper writes with the service role key, which bypasses RLS.
 alter table sources enable row level security;
