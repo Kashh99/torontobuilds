@@ -1,0 +1,6 @@
+anthropic>=1.8
+beautifulsoup4
+icalendar
+pydantic>=2
+python-dateutil
+requests
