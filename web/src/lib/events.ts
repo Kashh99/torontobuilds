@@ -82,6 +82,10 @@ async function loadUpcoming(): Promise<TechEvent[]> {
   return data as TechEvent[];
 }
 
+function torontoDate(d: Date): string {
+  return d.toLocaleDateString("en-CA", { timeZone: "America/Toronto" }); // YYYY-MM-DD
+}
+
 function torontoDay(d: Date): number {
   // 0 = Sunday, in Toronto time regardless of server timezone
   const name = d.toLocaleDateString("en-US", { weekday: "short", timeZone: "America/Toronto" });
@@ -97,8 +101,9 @@ function matchesWhen(e: TechEvent, when: When, now: Date): boolean {
     case "month":
       return days <= 30;
     case "weekend": {
-      // Friday evening through Sunday of the current (or upcoming) weekend
-      if (days > 7) return false;
+      // Friday evening through Sunday of this week (today counts if it is Sunday)
+      const sunday = torontoDate(new Date(now.getTime() + ((7 - torontoDay(now)) % 7) * 86_400_000));
+      if (torontoDate(start) > sunday) return false;
       const day = torontoDay(start);
       const hour = Number(start.toLocaleString("en-US", { hour: "numeric", hour12: false, timeZone: "America/Toronto" }));
       return day === 0 || day === 6 || (day === 5 && hour >= 17);

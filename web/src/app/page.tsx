@@ -27,7 +27,11 @@ function sourceName(url: string) {
   if (url.includes("meetup.com")) return "Meetup";
   if (url.includes("lu.ma") || url.includes("luma.com")) return "Luma";
   if (url.includes("eventbrite")) return "Eventbrite";
-  return new URL(url).hostname;
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return "Link";
+  }
 }
 
 export default async function Home({ searchParams }: { searchParams: SearchParams }) {
@@ -38,8 +42,8 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
     q: one(sp.q),
     category: one(sp.category),
     neighborhood: one(sp.neighborhood),
-    when: (whenParam in WHEN ? whenParam : "month") as When,
-    format: (formatParam in FORMAT ? formatParam : "in-person") as Format,
+    when: (Object.hasOwn(WHEN, whenParam) ? whenParam : "month") as When,
+    format: (Object.hasOwn(FORMAT, formatParam) ? formatParam : "in-person") as Format,
   };
   const { events, neighborhoods, total } = await getEvents(filters);
 
@@ -54,8 +58,8 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
       <header className="mb-8">
         <h1 className="text-3xl font-bold tracking-tight">TorontoBuilds</h1>
         <p className="mt-2 text-muted">
-          Every Toronto dev, AI and startup event from Eventbrite, Meetup and Luma, in one list with duplicates
-          merged. Refreshed nightly.
+          Toronto dev, AI and startup events from 30+ Meetup groups and Luma, in one list with duplicates merged.
+          Refreshed nightly.
         </p>
       </header>
 
