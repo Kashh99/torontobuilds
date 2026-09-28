@@ -1,6 +1,6 @@
 # TorontoBuilds
 
-**Live:** _not deployed yet — add the Vercel URL here_
+**Live:** https://torontobuilds.vercel.app
 
 **Every Toronto dev, AI and startup event from Eventbrite, Meetup and Luma in one list, with the same event posted in two places shown once.**
 
