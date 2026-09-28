@@ -71,7 +71,7 @@ def keyword_label(event: Event) -> None:
     text = f"{event.title} {event.description[:800]}".lower()
     event.category = next((c for c, pat in KEYWORD_CATEGORIES if re.search(pat, text)), "other")
     event.tags = [event.category]
-    event.is_tech = event.category != "other"
+    event.is_tech = event.trusted or event.category != "other"
 
 
 def _prompt_for(batch: list[Event]) -> str:
@@ -124,7 +124,7 @@ def enrich(events: list[Event]) -> list[Event]:
             if label is None:
                 keyword_label(e)
                 continue
-            e.is_tech = label.is_tech
+            e.is_tech = e.trusted or label.is_tech
             e.category = label.category
             e.tags = [t.strip().lower() for t in label.tags if t.strip()][:5]
             e.summary = label.summary.strip()

@@ -21,6 +21,7 @@ class RawEvent:
     lng: float | None = None
     online: bool = False
     image_url: str | None = None
+    trusted: bool = False  # from a hand-picked tech group feed
 
 
 @dataclass
@@ -44,3 +45,4 @@ class Event:
     tags: list[str] = field(default_factory=list)
     summary: str | None = None
     is_tech: bool = True
+    trusted: bool = False

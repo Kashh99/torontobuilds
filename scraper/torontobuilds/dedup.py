@@ -81,5 +81,6 @@ def merge(raws: list[RawEvent]) -> list[Event]:
             online=best.online,
             image_url=first("image_url"),
             source_urls=list(dict.fromkeys(r.url for r in group)),
+            trusted=any(r.trusted for r in group),
         ))
     return events
