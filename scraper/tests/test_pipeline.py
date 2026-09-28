@@ -135,3 +135,30 @@ def test_claude_refusal_falls_back_to_keywords(monkeypatch):
     monkeypatch.setattr(enrich_mod.anthropic, "Anthropic", lambda: SimpleNamespace(messages=FakeMessages()))
     kept = enrich_mod.enrich(merge([raw(title="LLM Evals Night")]))
     assert kept[0].category == "ai"
+
+
+def test_trusted_group_events_are_kept_without_keywords(monkeypatch):
+    monkeypatch.delenv("ANTHROPIC_API_KEY", raising=False)
+    kept = enrich_mod.enrich(merge([raw(title="Ubuntu Toronto Meetup", trusted=True)]))
+    assert [e.title for e in kept] == ["Ubuntu Toronto Meetup"]
+
+
+def test_fill_location_from_meetup_event_page():
+    from torontobuilds.fetchers import fill_location, needs_location
+
+    page = (FIXTURES / "meetup_find.html").read_text()  # has the TechTalk event's JSON-LD first
+    r = raw(url="https://www.meetup.com/torontojs/events/316396828/")
+    assert needs_location(r)
+    fill_location(r, page + '<script>{"lat":43.6497,"lng":-79.39129}</script>')
+    assert r.postal_code == "M5V 1Z4" and r.venue_name == "Super.com"
+    assert (r.lat, r.lng) == (43.6497, -79.39129)
+    assert not needs_location(r)
+
+
+def test_fill_location_ignores_placeholder_geo_on_online_events():
+    from torontobuilds.fetchers import fill_location
+
+    page = '<script type="application/ld+json">{"@type":"Event","name":"X","startDate":"2026-10-01T17:00:00Z","url":"https://www.meetup.com/g/events/1/","eventAttendanceMode":"https://schema.org/OnlineEventAttendanceMode","location":{"@type":"VirtualLocation"}}</script>{"lat":-8.521147,"lng":179.1962}'
+    r = raw(url="https://www.meetup.com/g/events/1/")
+    fill_location(r, page)
+    assert r.online and r.lat is None

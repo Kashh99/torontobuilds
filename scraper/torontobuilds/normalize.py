@@ -59,6 +59,7 @@ CENTROIDS = {
     "Kensington / Chinatown": (43.6540, -79.4000),
     "UofT / Annex": (43.6629, -79.3957),
     "Annex / Yorkville": (43.6710, -79.3930),
+    "Dupont / Casa Loma": (43.6750, -79.4080),
     "Church-Wellesley": (43.6655, -79.3810),
     "Trinity Bellwoods": (43.6480, -79.4140),
     "Liberty Village / Parkdale": (43.6380, -79.4210),

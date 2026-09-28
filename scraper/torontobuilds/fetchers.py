@@ -28,6 +28,9 @@ POSTAL_RE = re.compile(r"\b([A-Z]\d[A-Z])\s?(\d[A-Z]\d)\b", re.I)
 def fetch(url: str) -> str:
     resp = requests.get(url, headers={"User-Agent": USER_AGENT}, timeout=30)
     resp.raise_for_status()
+    # Meetup's iCal feed sends no charset, and requests then assumes ISO-8859-1
+    if "charset" not in resp.headers.get("Content-Type", ""):
+        resp.encoding = "utf-8"
     return resp.text
 
 
@@ -181,3 +184,34 @@ def parse_ics(text: str, source: str) -> list[RawEvent]:
 
 
 PARSERS = {"jsonld": parse_jsonld, "ics": parse_ics}
+
+
+# ---------- Meetup location backfill ----------
+
+# Meetup event pages embed the venue as "lat":..,"lng":.. in their page data.
+PAGE_GEO_RE = re.compile(r'"lat":(-?\d+\.\d+),"lng":(-?\d+\.\d+)')
+GTA_BOUNDS = (43.4, 44.2, -80.0, -78.9)  # lat_min, lat_max, lng_min, lng_max
+
+
+def needs_location(raw: RawEvent) -> bool:
+    """Meetup iCal feeds carry no location, and Meetup listing pages carry no postal code or coordinates."""
+    return "meetup.com" in raw.url and not (raw.online or raw.postal_code or raw.lat is not None)
+
+
+def fill_location(raw: RawEvent, html: str) -> None:
+    """Copy online/venue/address/coordinates from the event's own page into raw."""
+    page = next(iter(parse_jsonld(html, raw.source)), None)
+    if page is None:
+        return
+    raw.online = page.online
+    raw.venue_name = page.venue_name or raw.venue_name
+    raw.address = page.address or raw.address
+    raw.postal_code = page.postal_code or raw.postal_code
+    if raw.online:
+        raw.venue_name = raw.address = None
+        return
+    if m := PAGE_GEO_RE.search(html):
+        lat, lng = float(m.group(1)), float(m.group(2))
+        lat_min, lat_max, lng_min, lng_max = GTA_BOUNDS
+        if lat_min <= lat <= lat_max and lng_min <= lng <= lng_max:
+            raw.lat, raw.lng = lat, lng
