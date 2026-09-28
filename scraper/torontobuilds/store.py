@@ -48,6 +48,17 @@ class Store:
             found.update({row["dedup_hash"]: row for row in resp.json()})
         return found
 
+    def prune(self, run_started: datetime) -> int:
+        """Delete upcoming events this run didn't see: cancelled, moved, or no longer judged tech."""
+        resp = self.session.delete(
+            f"{self.url}/events",
+            params={"start_time": f"gte.{run_started.isoformat()}", "scraped_at": f"lt.{run_started.isoformat()}"},
+            headers={"Prefer": "return=representation"},
+            timeout=30,
+        )
+        resp.raise_for_status()
+        return len(resp.json())
+
     def upsert(self, events: list[Event]) -> int:
         if not events:
             return 0

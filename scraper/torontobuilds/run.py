@@ -12,7 +12,7 @@ import json
 import logging
 import time
 from dataclasses import asdict
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from .dedup import merge
@@ -76,6 +76,7 @@ def main() -> int:
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
+    run_started = datetime.now(timezone.utc)
     config = json.loads(SOURCES_FILE.read_text())
     raws, failures = scrape(config)
     now = datetime.now(TORONTO)
@@ -90,7 +91,8 @@ def main() -> int:
         store = Store()
         known = store.existing_labels([e.dedup_hash for e in events])
         for e in events:
-            if label := known.get(e.dedup_hash):
+            # "other" labels get a fresh look each night instead of being kept forever
+            if (label := known.get(e.dedup_hash)) and label["category"] != "other":
                 e.category, e.tags, e.summary = label["category"], label["tags"], label["summary"]
         new = [e for e in events if e.summary is None]
         log.info("%d events already labelled, %d new", len(events) - len(new), len(new))
@@ -102,6 +104,10 @@ def main() -> int:
     if store:
         store.upsert(kept)
         log.info("upserted %d events", len(kept))
+        if failures:
+            log.warning("%d source URLs failed; not pruning, so their events survive until next run", len(failures))
+        else:
+            log.info("pruned %d upcoming events not seen this run", store.prune(run_started))
     else:
         if args.json:
             args.json.write_text(json.dumps([asdict(e) for e in kept], default=lambda o: o.isoformat(), indent=1))

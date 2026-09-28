@@ -124,7 +124,7 @@ def enrich(events: list[Event]) -> list[Event]:
             if label is None:
                 keyword_label(e)
                 continue
-            e.is_tech = e.trusted or label.is_tech
+            e.is_tech = label.is_tech
             e.category = label.category
             e.tags = [t.strip().lower() for t in label.tags if t.strip()][:5]
             e.summary = label.summary.strip()
