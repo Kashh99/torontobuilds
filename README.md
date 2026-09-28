@@ -2,9 +2,9 @@
 
 **Live:** https://torontobuilds.vercel.app
 
-**Every Toronto dev, AI and startup event from Eventbrite, Meetup and Luma in one list, with the same event posted in two places shown once.**
+**Toronto dev, AI and startup events from 30+ Meetup groups and Luma in one list, with the same event posted in two places shown once.**
 
-Checking three sites every week is tedious, and the same meetup often shows up on two of them with slightly different titles. TorontoBuilds scrapes all three nightly, merges duplicates, drops the non-tech noise those "science & tech" categories are full of, and lets you filter by topic, neighborhood and date.
+Checking dozens of group pages every week is tedious, and the same meetup often shows up in two places with slightly different titles. TorontoBuilds scrapes them nightly, merges duplicates, drops the non-tech noise those "science & tech" categories are full of, and lets you filter by topic, neighborhood and date.
 
 **Tradeoff:** it scrapes public listing pages (schema.org JSON-LD and Meetup iCal feeds) instead of official APIs, so a site redesign can break a source overnight. A broken source is logged and skipped; the rest still update.
 
@@ -13,16 +13,18 @@ Checking three sites every week is tedious, and the same meetup often shows up o
 ## How it works
 
 ```
-Eventbrite / Luma / Meetup pages ──► scraper (Python, nightly GitHub Action)
+Luma / Meetup pages ────────────────► scraper (Python, nightly GitHub Action)
     JSON-LD + iCal parsers              │  parse ─► dedup ─► Claude labels ─► upsert
                                         ▼
                                  Postgres (Supabase) ──► Next.js frontend (Vercel)
 ```
 
-- **Parsing** – `scraper/torontobuilds/fetchers.py`. Eventbrite, Luma and Meetup listing pages all embed schema.org `Event` JSON-LD, so one parser covers them. Individual Meetup groups add their iCal feed. Sources live in `scraper/sources.json`.
+- **Parsing** – `scraper/torontobuilds/fetchers.py`. Luma and Meetup listing pages (and Eventbrite's) embed schema.org `Event` JSON-LD, so one parser covers them. 32 hand-picked Toronto Meetup groups add their iCal feeds. Sources live in `scraper/sources.json`.
+- **Locations** – Meetup iCal feeds have no location, so the scraper reads each Meetup event's page for venue, address and coordinates.
 - **Dedup** – `scraper/torontobuilds/dedup.py`. `dedup_hash = sha1(normalized title | Toronto date | online/in-person)`. Title normalization lowercases, strips punctuation, drops words sources add freely ("Toronto", "meetup", months, years, "in-person") and sorts the rest, so "AI Tinkerers Toronto – Oct 2026" and "Toronto AI Tinkerers (In-Person)" collide. Merged events keep every source URL, take the time from whichever listing has one (Eventbrite listings are date-only), and fill missing fields from the others.
 - **Neighborhood** – postal code prefix (FSA) first, then nearest known centroid within 1.5 km from lat/lng.
-- **Claude** – `scraper/torontobuilds/enrich.py`. One structured-output call per 20 new events decides whether it is actually a tech event (the Eventbrite "science & tech" category includes pharmacy conferences and drone courses), assigns a category and tags, and writes a one-line "why go" summary. Events already labelled in the DB are not sent again. Without `ANTHROPIC_API_KEY`, keyword rules take over.
+- **Claude** – `scraper/torontobuilds/enrich.py`. One structured-output call per 20 new events decides whether it is actually a tech event (the Eventbrite "science & tech" category includes pharmacy conferences and drone courses), assigns a category and tags, and writes a one-line "why go" summary. Events already labelled in the DB are not sent again. Without `ANTHROPIC_API_KEY`, keyword rules take over (and events from the hand-picked groups are always kept).
+- **Cleanup** – after a run where every source succeeded, upcoming events that weren't seen are deleted (cancelled, moved, or no longer judged tech).
 
 ## Run it
 
