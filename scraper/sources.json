@@ -1,0 +1,32 @@
+[
+  {
+    "source": "eventbrite",
+    "parser": "jsonld",
+    "urls": [
+      "https://www.eventbrite.ca/d/canada--toronto/science-and-tech--events/",
+      "https://www.eventbrite.ca/d/canada--toronto/science-and-tech--events/?page=2",
+      "https://www.eventbrite.ca/d/canada--toronto/science-and-tech--events/?page=3"
+    ]
+  },
+  {
+    "source": "luma",
+    "parser": "jsonld",
+    "urls": [
+      "https://luma.com/toronto?k=c&c=tech"
+    ]
+  },
+  {
+    "source": "meetup",
+    "parser": "jsonld",
+    "urls": [
+      "https://www.meetup.com/find/?location=ca--on--Toronto&source=EVENTS&categoryId=546"
+    ]
+  },
+  {
+    "source": "meetup",
+    "parser": "ics",
+    "urls": [
+      "https://www.meetup.com/torontojs/events/ical/"
+    ]
+  }
+]
