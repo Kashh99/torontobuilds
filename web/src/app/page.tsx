@@ -1,4 +1,4 @@
-import { CATEGORIES, WHEN, getEvents, type Filters, type TechEvent, type When } from "@/lib/events";
+import { CATEGORIES, FORMAT, WHEN, getEvents, type Filters, type Format, type TechEvent, type When } from "@/lib/events";
 
 type SearchParams = Promise<{ [key: string]: string | string[] | undefined }>;
 
@@ -33,11 +33,13 @@ function sourceName(url: string) {
 export default async function Home({ searchParams }: { searchParams: SearchParams }) {
   const sp = await searchParams;
   const whenParam = one(sp.when);
+  const formatParam = one(sp.format);
   const filters: Filters = {
     q: one(sp.q),
     category: one(sp.category),
     neighborhood: one(sp.neighborhood),
     when: (whenParam in WHEN ? whenParam : "month") as When,
+    format: (formatParam in FORMAT ? formatParam : "in-person") as Format,
   };
   const { events, neighborhoods, total } = await getEvents(filters);
 
@@ -57,12 +59,12 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         </p>
       </header>
 
-      <form className="mb-8 grid grid-cols-2 gap-2 sm:grid-cols-4" action="/">
+      <form className="mb-8 grid grid-cols-2 gap-2 sm:grid-cols-5" action="/">
         <input
           name="q"
           defaultValue={filters.q}
           placeholder="Search: rust, agents, pitch night…"
-          className="col-span-2 rounded-md border border-line bg-surface px-3 py-2 sm:col-span-4"
+          className="col-span-2 rounded-md border border-line bg-surface px-3 py-2 sm:col-span-5"
         />
         <select name="category" defaultValue={filters.category} className="rounded-md border border-line bg-surface px-2 py-2">
           <option value="">All topics</option>
@@ -80,6 +82,13 @@ export default async function Home({ searchParams }: { searchParams: SearchParam
         </select>
         <select name="when" defaultValue={filters.when} className="rounded-md border border-line bg-surface px-2 py-2">
           {Object.entries(WHEN).map(([value, label]) => (
+            <option key={value} value={value}>
+              {label}
+            </option>
+          ))}
+        </select>
+        <select name="format" defaultValue={filters.format} className="rounded-md border border-line bg-surface px-2 py-2">
+          {Object.entries(FORMAT).map(([value, label]) => (
             <option key={value} value={value}>
               {label}
             </option>

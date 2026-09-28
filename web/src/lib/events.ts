@@ -40,11 +40,19 @@ export const WHEN = {
 } as const;
 export type When = keyof typeof WHEN;
 
+export const FORMAT = {
+  "in-person": "In person",
+  online: "Online",
+  any: "In person + online",
+} as const;
+export type Format = keyof typeof FORMAT;
+
 export type Filters = {
   q: string;
   category: string;
   neighborhood: string;
   when: When;
+  format: Format;
 };
 
 const COLUMNS =
@@ -105,12 +113,15 @@ export async function getEvents(filters: Filters) {
   const now = new Date();
   const q = filters.q.trim().toLowerCase();
 
-  const neighborhoods = [...new Set(all.map((e) => e.neighborhood).filter((n): n is string => !!n))].sort();
+  const neighborhoods = [
+    ...new Set(all.map((e) => e.neighborhood).filter((n): n is string => !!n && n !== "Online")),
+  ].sort();
 
   const events = all.filter(
     (e) =>
       (!filters.category || e.category === filters.category) &&
       (!filters.neighborhood || e.neighborhood === filters.neighborhood) &&
+      (filters.format === "any" || e.online === (filters.format === "online")) &&
       matchesWhen(e, filters.when, now) &&
       (!q || `${e.title} ${e.summary ?? ""} ${e.tags.join(" ")} ${e.venue_name ?? ""}`.toLowerCase().includes(q)),
   );
