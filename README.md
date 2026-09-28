@@ -8,6 +8,8 @@ Checking three sites every week is tedious, and the same meetup often shows up o
 
 **Tradeoff:** it scrapes public listing pages (schema.org JSON-LD and Meetup iCal feeds) instead of official APIs, so a site redesign can break a source overnight. A broken source is logged and skipped; the rest still update.
 
+**Known gap:** Eventbrite blocks requests from GitHub Actions runners (HTTP 405), so it is disabled in `scraper/sources.json` for now. The parser still handles its pages; it needs a different place to run from or the official API.
+
 ## How it works
 
 ```

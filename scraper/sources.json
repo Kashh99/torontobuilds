@@ -1,14 +1,5 @@
 [
   {
-    "source": "eventbrite",
-    "parser": "jsonld",
-    "urls": [
-      "https://www.eventbrite.ca/d/canada--toronto/science-and-tech--events/",
-      "https://www.eventbrite.ca/d/canada--toronto/science-and-tech--events/?page=2",
-      "https://www.eventbrite.ca/d/canada--toronto/science-and-tech--events/?page=3"
-    ]
-  },
-  {
     "source": "luma",
     "parser": "jsonld",
     "urls": [
