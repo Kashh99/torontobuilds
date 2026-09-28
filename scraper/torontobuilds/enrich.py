@@ -62,7 +62,7 @@ KEYWORD_CATEGORIES = [
     ("hardware", r"\b(hardware|robot\w*|iot|embedded|arduino|3d print\w*)\b"),
     ("web-dev", r"\b(javascript|typescript|react|node|web|frontend|css|python|rust|golang|developer)\b"),
     ("design-product", r"\b(ux|ui|design|product manag\w*|figma)\b"),
-    ("startup", r"\b(startup|founder|vc|pitch|fundrais\w*|accelerator)\b"),
+    ("startup", r"\b(startup|founder|vc|yc|y combinator|pitch|fundrais\w*|accelerator)\b"),
     ("career", r"\b(career|hiring|job fair|resume|interview)\b"),
 ]
 

@@ -70,13 +70,6 @@ NEAREST_MAX_KM = 1.5
 
 BOROUGH_BY_PREFIX = {"M1": "Scarborough", "M2": "North York", "M3": "North York", "M8": "Etobicoke", "M9": "Etobicoke"}
 
-TECH_KEYWORDS = re.compile(
-    r"\b(ai|ml|llm|gpt|machine learning|data|dev|developer|engineer|software|code|coding|hack|"
-    r"javascript|typescript|python|rust|golang|react|web|cloud|aws|azure|kubernetes|devops|"
-    r"startup|founder|product|saas|api|open source|security|cyber|robot|hardware|iot|blockchain|"
-    r"tech|ux|design system|figma|analytics|infra)\b",
-    re.I,
-)
 
 
 def clean_text(text: str) -> str:
@@ -110,8 +103,3 @@ def neighborhood_for(raw: RawEvent) -> str | None:
         if dist <= NEAREST_MAX_KM:
             return name
     return None
-
-
-def looks_like_tech(raw: RawEvent) -> bool:
-    """Cheap pre-filter. Claude makes the final call when an API key is set."""
-    return bool(TECH_KEYWORDS.search(f"{raw.title} {raw.description[:500]}"))

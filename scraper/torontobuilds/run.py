@@ -2,6 +2,7 @@
 
     python -m torontobuilds.run             # full run, writes to Supabase
     python -m torontobuilds.run --dry-run   # print what would be written
+    python -m torontobuilds.run --dry-run --json ../web/sample-events.json   # offline data for the frontend
 """
 
 from __future__ import annotations
@@ -9,6 +10,7 @@ from __future__ import annotations
 import argparse
 import json
 import logging
+from dataclasses import asdict
 from datetime import datetime, timedelta
 from pathlib import Path
 
@@ -47,6 +49,7 @@ def in_window(raw: RawEvent, now: datetime) -> bool:
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--json", type=Path, help="with --dry-run, also write events to this file")
     args = ap.parse_args()
     logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
 
@@ -76,6 +79,9 @@ def main() -> int:
         store.upsert(kept)
         log.info("upserted %d events", len(kept))
     else:
+        if args.json:
+            args.json.write_text(json.dumps([asdict(e) for e in kept], default=lambda o: o.isoformat(), indent=1))
+            log.info("wrote %s", args.json)
         for e in sorted(kept, key=lambda e: e.start_time):
             print(f"{e.start_time:%a %b %d %H:%M}  [{e.category}] {e.title}  ({e.neighborhood or '?'}; {len(e.source_urls)} source(s))")
             if e.summary:
