@@ -20,7 +20,7 @@ from .models import Event
 
 log = logging.getLogger(__name__)
 
-MODEL = "claude-opus-5"
+MODEL = "claude-haiku-4-5"
 BATCH_SIZE = 20
 DESCRIPTION_CHARS = 1500
 
@@ -103,7 +103,6 @@ def enrich(events: list[Event]) -> list[Event]:
                 model=MODEL,
                 max_tokens=16000,
                 system=SYSTEM,
-                output_config={"effort": "low"},
                 messages=[{"role": "user", "content": _prompt_for(batch)}],
                 output_format=LabelBatch,
             )
