@@ -2,6 +2,8 @@
 
 **Live:** https://torontobuilds.vercel.app
 
+![TorontoBuilds - event list with search and filters](screenshot.png)
+
 **Toronto dev, AI and startup events from 30+ Meetup groups and Luma in one list, with the same event posted in two places shown once.**
 
 Checking dozens of group pages every week is tedious, and the same meetup often shows up in two places with slightly different titles. TorontoBuilds scrapes them nightly, merges duplicates, drops the non-tech noise that tech listings are full of, and lets you filter by topic, neighborhood and date.
@@ -58,3 +60,4 @@ Set `SUPABASE_URL` and `SUPABASE_ANON_KEY` in Vercel (project root: `web`).
 ## Adding a source
 
 Add an entry to `scraper/sources.json`. Any page with schema.org `Event` JSON-LD works with `"parser": "jsonld"`; any iCal feed works with `"parser": "ics"`. For a new site, also add a row to the `sources` table.
+
